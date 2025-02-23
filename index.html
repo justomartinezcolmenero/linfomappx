@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Herramienta de Pronóstico - Linfomas</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { font-size: 24px; color: #333; }
+    label { font-weight: bold; }
+    select, button { padding: 5px; margin: 5px 0; }
+    #resultado { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Herramienta de Pronóstico - Linfomas</h1>
+  <form id="linfomaForm">
+    <label>Subtipo de linfoma:</label><br>
+    <select id="subtipo">
+      <optgroup label="Linfomas de Hodgkin">
+        <option value="HL_EsclerosisNodular">Hodgkin - Esclerosis Nodular</option>
+        <option value="HL_CelularidadMixta">Hodgkin - Celularidad Mixta</option>
+        <option value="HL_RicoLinfocitos">Hodgkin - Rico en Linfocitos</option>
+        <option value="HL_DeplecionLinfocitos">Hodgkin - Depleción Linfocítica</option>
+        <option value="HL_PredLinfocitario">Hodgkin - Predominio Linfocitario Nodular</option>
+      </optgroup>
+      <optgroup label="Linfomas No Hodgkin - Agresivos">
+        <option value="DLBCL">No Hodgkin - DLBCL</option>
+        <option value="Burkitt">No Hodgkin - Burkitt</option>
+        <option value="CelulasManto">No Hodgkin - Células del Manto</option>
+        <option value="LinfomaT_Periferico">No Hodgkin - Linfoma T Periférico (NOS)</option>
+        <option value="AnaplasicoGrandes">No Hodgkin - Anaplásico de Células Grandes</option>
+      </optgroup>
+      <optgroup label="Linfomas No Hodgkin - Indolentes">
+        <option value="Folicular">No Hodgkin - Folicular</option>
+        <option value="LinfomaZonaMarginal">No Hodgkin - Zona Marginal</option>
+        <option value="LinfomaLinfoplasmocitico">No Hodgkin - Linfoplasmocítico</option>
+        <option value="LeucemiaLinfaticaCronica">No Hodgkin - Leucemia Linfática Crónica/SLL</option>
+      </optgroup>
+    </select><br><br>
+    <label>Estadiaje:</label><br>
+    <select id="estadio">
+      <option value="I">I</option>
+      <option value="II">II</option>
+      <option value="III">III</option>
+      <option value="IV">IV</option>
+    </select><br><br>
+    <label>Síntomas B (marque si están presentes):</label><br>
+    <input type="checkbox" id="fiebre"> Fiebre<br>
+    <input type="checkbox" id="perdidaPeso"> Pérdida de peso (>10%)<br>
+    <input type="checkbox" id="sudores"> Sudores nocturnos<br>
+    <p><i>Nota: Evalúe estos síntomas, afectan el pronóstico.</i></p>
+    <label>ECOG (estado funcional):</label><br>
+    <select id="ecog">
+      <option value="0">0 - Activo</option>
+      <option value="1">1 - Síntomas leves</option>
+      <option value="2">2 - En cama <50%</option>
+      <option value="3">3 - En cama >50%</option>
+      <option value="4">4 - Dependiente</option>
+    </select><br><br>
+    <button type="button" onclick="calcular()">Calcular Pronóstico</button>
+  </form>
+  <div id="resultado"></div>
+
+  <script>
+    function calcular() {
+      let subtipo = document.getElementById("subtipo").value;
+      let estadio = document.getElementById("estadio").value;
+      let fiebre = document.getElementById("fiebre").checked;
+      let perdidaPeso = document.getElementById("perdidaPeso").checked;
+      let sudores = document.getElementById("sudores").checked;
+      let sintomasB = fiebre || perdidaPeso || sudores;
+      let ecog = document.getElementById("ecog").value;
+      let salida = "<h3>Resultado:</h3>";
+
+      if (subtipo.startsWith("HL_")) {
+        salida += "Pronóstico: Hodgkin, generalmente favorable con tratamiento. ";
+        if (estadio === "I" || estadio === "II") salida += "Estadio temprano.<br>";
+        else salida += "Estadio avanzado.<br>";
+        salida += sintomasB ? "Supervivencia con tratamiento: 1 año >90%, 5 años ~80%.<br>" : "Supervivencia con tratamiento: 1 año >95%, 5 años ~85-90%.<br>";
+        salida += "Sin tratamiento: 1 año ~50-60%, 5 años ~20-30%.<br>";
+        salida += estadio === "IV" ? "Derivar a hematología en <1 semana.<br>" : "Derivar a hematología en 1-2 semanas.<br>";
+      } else if (subtipo === "DLBCL") {
+        salida += "Pronóstico: DLBCL, agresivo. ";
+        if (estadio === "I" || estadio === "II") salida += "Estadio temprano, respuesta favorable.<br>";
+        else salida += "Estadio avanzado, pronóstico intermedio.<br>";
+        salida += sintomasB ? "Supervivencia con tratamiento: 1 año ~80%, 5 años ~55-60%.<br>" : "Supervivencia con tratamiento: 1 año ~85%, 5 años ~60-65%.<br>";
+        salida += "Sin tratamiento: 1 año ~20-30%, 5 años <10%.<br>";
+        salida += estadio === "IV" ? "Derivar a hematología en <1 semana.<br>" : "Derivar a hematología en 1-2 semanas.<br>";
+      } else if (subtipo === "Burkitt") {
+        salida += "Pronóstico: Burkitt, muy agresivo. Requiere tratamiento urgente.<br>";
+        salida += "Supervivencia con tratamiento: 1 año ~70-80%, 5 años ~50-60%.<br>";
+        salida += "Sin tratamiento: 1 año <20%, 5 años <5%.<br>";
+        salida += "Derivar a hematología en <48 horas.<br>";
+      } else if (subtipo === "CelulasManto") {
+        salida += "Pronóstico: Células del Manto, agresivo, difícil manejo.<br>";
+        salida += "Supervivencia con tratamiento: 1 año ~70%, 5 años ~40-50%.<br>";
+        salida += "Sin tratamiento: 1 año ~20%, 5 años <10%.<br>";
+        salida += "Derivar a hematología en <1 semana.<br>";
+      } else if (subtipo === "LinfomaT_Periferico") {
+        salida += "Pronóstico: Linfoma T Periférico, variable, a menudo reservado.<br>";
+        salida += "Supervivencia con tratamiento: 1 año ~60-70%, 5 años ~30-40%.<br>";
+        salida += "Sin tratamiento: 1 año ~20-30%, 5 años <10%.<br>";
+        salida += "Derivar a hematología en <1 semana.<br>";
+      } else if (subtipo === "AnaplasicoGrandes") {
+        salida += "Pronóstico: Anaplásico de Células Grandes, variable según subtipo.<br>";
+        salida += "Supervivencia con tratamiento: 1 año ~70-80%, 5 años ~50-60%.<br>";
+        salida += "Sin tratamiento: 1 año ~30-40%, 5 años ~10-20%.<br>";
+        salida += "Derivar a hematología en 1-2 semanas.<br>";
+      } else if (subtipo === "Folicular") {
+        salida += "Pronóstico: Folicular, indolente. Curso lento.<br>";
+        salida += "Supervivencia con tratamiento: 1 año >90%, 5 años ~70-80%.<br>";
+        salida += "Sin tratamiento: 1 año ~80-90%, 5 años ~50-60%.<br>";
+        salida += "Derivar a hematología en 2-4 semanas.<br>";
+      } else if (subtipo === "LinfomaZonaMarginal") {
+        salida += "Pronóstico: Zona Marginal, indolente. Progresión lenta.<br>";
+        salida += "Supervivencia con tratamiento: 1 año >90%, 5 años ~80-85%.<br>";
+        salida += "Sin tratamiento: 1 año >85%, 5 años ~60-70%.<br>";
+        salida += "Derivar a hematología en 2-4 semanas.<br>";
+      } else if (subtipo === "LinfomaLinfoplasmocitico") {
+        salida += "Pronóstico: Linfoplasmocítico, indolente. Puede complicarse.<br>";
+        salida += "Supervivencia con tratamiento: 1 año >85%, 5 años ~60-70%.<br>";
+        salida += "Sin tratamiento: 1 año ~70-80%, 5 años ~40-50%.<br>";
+        salida += "Derivar a hematología en 2-4 semanas.<br>";
+      } else if (subtipo === "LeucemiaLinfaticaCronica") {
+        salida += "Pronóstico: LLC/SLL, indolente. Curso variable.<br>";
+        salida += "Supervivencia con tratamiento: 1 año >90%, 5 años ~70-80%.<br>";
+        salida += "Sin tratamiento: 1 año ~80-90%, 5 años ~50-60%.<br>";
+        salida += "Derivar a hematología en 2-4 semanas.<br>";
+      }
+
+      if (ecog >= 3) salida += "<b>Alerta:</b> ECOG elevado, vigilar estado general y posible sepsis.<br>";
+      if (fiebre && ecog >= 2) salida += "<b>Alerta:</b> Riesgo de sepsis, revisar fiebre + taquicardia/hipotensión.<br>";
+
+      document.getElementById("resultado").innerHTML = salida;
+    }
+  </script>
+</body>
+</html>
